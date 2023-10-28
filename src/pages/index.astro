@@ -1,6 +1,25 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import Card from '../components/Card.astro';
+import { getCollection } from "astro:content";
+import { format, isBefore } from "date-fns";
+
+export async function getStaticPaths() {
+  const myThoughts = await getCollection("thoughts");
+  return myThoughts.map((entry) => ({
+    params: { slug: entry.slug },
+    props: { entry },
+  }));
+}
+
+
+const allThoughts = await getCollection("thoughts");
+      allThoughts.sort((a, b) => {
+        return isBefore(b.data.date, a.data.date) ? -1 : 1;
+});
+
+const { entry } = Astro.props;
+
 ---
 
 <Layout title="Welcome to Astro.">
@@ -13,14 +32,31 @@ import Card from '../components/Card.astro';
 	    </a> workshop at the end of October 2023.
         </p>
         <p class="instructions">
-
-
             Here is some more text, in another paragraph.
         </p>
         <p >
             And a third paragraph.  Untabified.
         </p>
         <p>Here is some text in a paragraph</p>
+      <ul
+	class="mx-auto max-w-prose px-4 md:px-0 mt-12 a:underline"
+      >
+	{
+	  allThoughts.map((b) => (
+	    <li>
+	      {format(b.data.date, "MMM do yyyy")}{" "}
+	      <a
+		href={`/thoughts/${b.slug}`}
+	      >
+		{b.data.title}
+	      </a>
+	    </li>
+	  ))
+	}
+      </ul>
+
+
+
 
     </main>
 </Layout>
